@@ -1,0 +1,16 @@
+package ${package}.dao;
+
+import java.util.List;
+import ${package}.model.${modelName};
+
+/**
+* ${modelRemark}
+* @author ${author}
+* @project ${project}
+* @date  ${now?datetime}
+*/
+public interface ${modelName}Dao extends BaseDao<${modelName}>{
+
+}
+
+

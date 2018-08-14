@@ -1,0 +1,42 @@
+package ${package}.dao.impl;
+
+import java.util.List;
+import ${package}.dao.CommonBaseDao;
+import ${package}.dao.${modelName}Dao;
+import ${package}.model.${modelName};
+
+import org.springframework.stereotype.Repository;
+
+/**
+* Demo
+* @author hshcws
+*/
+@Repository
+public class ${modelName}DaoImpl extends CommonBaseDao implements ${modelName}Dao {
+
+    @Override
+    public List<${modelName}> getList(${modelName} ${modelName?uncap_first}) {
+        return this.queryList("${package}.dao.${modelName}Mapper.getList", ${modelName?uncap_first});
+    }
+
+    @Override
+    public ${modelName} getOne(Long id) {
+    return this.queryOne("${package}.dao.${modelName}Mapper.getOne", id);
+    }
+
+    @Override
+    public int insert(${modelName} ${modelName?uncap_first}) {
+    return this.insert("${package}.dao.${modelName}Mapper.insert", ${modelName?uncap_first});
+    }
+
+    @Override
+    public int update(${modelName} ${modelName?uncap_first}) {
+    return this.update("${package}.dao.${modelName}Mapper.update", ${modelName?uncap_first});
+    }
+
+    @Override
+    public int delete(${modelName} ${modelName?uncap_first}) {
+    return this.update("${package}.dao.${modelName}Mapper.delete", ${modelName?uncap_first});
+    }
+
+    }

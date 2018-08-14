@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="${package}.dao.${modelName}Mapper" >
+
+    <sql id="column_all" >
+        <#assign sign=false>
+        <#list columns as item><#if sign==true>,</#if>${item.name}<#assign sign=true></#list>
+    </sql>
+
+    <sql id="Where_Clause">
+        <where>
+            1 = 1
+            <#list columns as item>
+              <if test="${item.fieldName} != null">
+                  AND ${item.name} = ${"#"}{${item.fieldName}}
+              </if>
+            </#list>
+        </where>
+    </sql>
+
+    <select id="getList" resultType="${modelName}" parameterType="${modelName}">
+        SELECT
+          <include refid="column_all"/>
+        FROM ${tableName}
+        <include refid="Where_Clause"/>
+        ORDER BY id DESC
+    </select>
+
+    <select id="getOne" resultType="${modelName}" parameterType="java.lang.Long">
+        SELECT
+        <include refid="column_all"/>
+        FROM ${tableName}
+        WHERE
+        id = ${"#"}{id}
+        AND del_flag = 0
+    </select>
+
+    <insert id="insert" parameterType="${modelName}" >
+        insert into ${tableName} (
+        <#list columns as item>${item.name}<#if item_index lt columns?size-1 >,</#if><#if item_index gt 7><#if item_index%8==0>
+        </#if></#if></#list>)
+        values (<#assign sign=false><#list columns as item><#if sign>,</#if>${"#"}{${item.fieldName}}<#assign sign=true><#if item_index gt 7><#if item_index%8==0>
+        </#if></#if></#list>)
+    </insert>
+
+
+    <update id="update" parameterType="${package}.entity.${modelName}" >
+        update ${tableName}
+        <set>
+            <#list columns as item>
+                <#if item.fieldName != "version">
+                    <if test="${item.fieldName} != null" >
+                        ${item.name} = ${"#"}{${item.fieldName},jdbcType=${item.type}},
+                    </if>
+                 </#if>
+            </#list>
+                version = version + 1
+        </set>
+        where ${idField} = ${"#"}{${idFieldName}
+        AND version = ${"#"}{version}
+    </update>
+
+    <update id="delete" parameterType="DemoModel">
+        UPDATE ${tableName}
+        SET
+            del_flag = ${"#"}{delFlag},
+            version = version + 1
+        WHERE
+        id = ${"#"}{id}
+        AND version = ${"#"}{version}
+        AND del_flag = 0
+    </update>
+</mapper>

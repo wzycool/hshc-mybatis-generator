@@ -1,0 +1,65 @@
+package ${package}.entity;
+
+import java.io.Serializable;
+import com.hshc.ws.util.ContrastField;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.Alias;
+<#list packages as p>
+import ${p};
+</#list>
+
+/**
+ * ${modelRemark}实体</p>
+ * ${modelName}对应数据库表 ${tableName}
+ * @author ${author}
+ * @project ${project}
+ * @date  ${now?datetime}
+ */
+@Data
+@NoArgsConstructor
+@Alias("${modelName}")
+public class ${modelName} implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	
+	<#list columns as item>
+	<#if item.name == idField>
+	//主键字段
+	</#if>
+	@ContrastField(value = "${item.remark}")
+	private ${item.typeName} ${item.fieldName};
+	
+	</#list>
+	//set 和 get方法
+	
+	<#list columns as item>
+	/**
+	 * ${item.remark}
+	 *
+	 * @param ${item.fieldName}
+	 */
+	public void set${item.fieldName?cap_first}(${item.typeName} ${item.fieldName}) {
+	
+		this.${item.fieldName} = ${item.fieldName};
+	}
+	
+	/**
+	 * ${item.remark}
+	 *
+	 * @return ${item.typeName}
+	 */
+	public ${item.typeName} get${item.fieldName?cap_first}() {
+	
+		return this.${item.fieldName};
+	}
+	
+	</#list>
+	
+	@Override
+	public String toString() {
+		<#assign sign=false>
+		
+		return "${modelName} [<#list columns as item><#if sign>,</#if>${item.fieldName}=" + ${item.fieldName} + "<#assign sign=true></#list>]";
+	}
+}

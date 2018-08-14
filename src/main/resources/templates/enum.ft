@@ -1,0 +1,43 @@
+package ${package}.util.enums;
+
+import com.hshc.basetools.enums.ISEnum;
+
+/**
+* @Description 状态枚举定义
+* @Author hshcws
+* @Version 1.0
+**/
+public enum ${modelName}StatEnum implements ISEnum {
+
+
+    DELETE(0, "删除");
+
+    private Integer code;
+    private String  name;
+
+    ${modelName}StatEnum(Integer code, String name) {
+        this.code = code;
+        this.name = name;
+    }
+
+    @Override
+    public Integer getCode() {
+        return code;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public static boolean exist(Integer code) {
+        ${modelName}StatEnum[] statEnums = ${modelName}StatEnum.values();
+        for (${modelName}StatEnum statEnum : statEnums) {
+            if (statEnum.eq(code)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+}

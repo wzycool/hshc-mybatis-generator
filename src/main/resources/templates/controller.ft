@@ -1,0 +1,179 @@
+package ${package}.controller;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+import com.github.pagehelper.PageInfo;
+import ${package}.common.hbase.history.OperationHBaseClient;
+import ${package}.common.redis.LockRedisClient;
+import ${package}.model.${modelName};
+import ${package}.service.${modelName}Service;
+import ${package}.util.Constants;
+import ${package}.util.RedisNamespaceConstants;
+import com.hshc.basetools.extfield.ExtFieldUtil;
+import com.hshc.basetools.log.LogUtil;
+import com.hshc.basetools.model.Res;
+import com.hshc.commonbase.auth.UserUtil;
+import com.hshc.framework.redis.cmd.LockCmd;
+
+/**
+ * ${modelRemark} 控制器
+ * @author ${author}
+ * @project ${project}
+ * @date  ${now?datetime}
+ */
+@Controller
+@RequestMapping("${requestUrl}")
+public class ${modelName}Controller{
+
+private final LockCmd LOCK = LockRedisClient.getInstance(RedisNamespaceConstants.DEMO_LOCK_NAMESPACE);
+
+    <#if modelName??>
+        <#assign  lower= modelName?uncap_first >
+         <#assign service=lower+"Service" >
+        </#if>
+    @Autowired
+    private ${modelName}Service ${service};
+
+
+    @RequestMapping("index")
+    public ModelAndView index(ModelAndView modelAndView) {
+        modelAndView.setViewName("/web/${modelName?uncap_first}/${modelName?uncap_first}List");
+        return modelAndView;
+    }
+
+    @RequestMapping("historyPage")
+    public ModelAndView historyPage(HttpServletRequest req, ModelAndView modelAndView) {
+        modelAndView.setViewName("/web/${modelName?uncap_first}/${modelName?uncap_first}History");
+        return modelAndView;
+    }
+
+    @RequestMapping("historyList")
+    @ResponseBody
+    public Object getHistoryList(HttpServletRequest req, @RequestParam Long id) {
+        return ExtFieldUtil.genConvertList(OperationHBaseClient.getHistoryList(id));
+    }
+
+    /**
+     * 保存
+     *
+     **/
+    @RequestMapping("insert")
+    @ResponseBody
+    public Object insert(HttpServletRequest req,${modelName} ${modelName?uncap_first}) {
+        boolean locked = false;
+        String lockKey = "${modelName?uncap_first}:insert:" + System.currentTimeMillis();
+
+        try {
+            locked = LOCK.lock(lockKey, Constants.DLOCK_TIME_3_SECONDS);
+            if (!locked) {
+                return Res.err("请稍后重试");
+            }
+
+            // 其它校验
+
+            return ${service}.insert(${modelName?uncap_first}, UserUtil.getUser(req));
+        } catch (Exception e) {
+            LogUtil.getLog(${modelName}Controller.class).error("新增失败", e);
+            return Res.err("新增失败");
+        } finally {
+            try {
+                if (locked) {
+                    LOCK.unlock(lockKey);
+                }
+            } catch (Exception e) {
+                LogUtil.getLog(${modelName}Controller.class).error("新增释放锁异常[lockKey={}]", lockKey);
+            }
+        }
+    }
+
+    /**
+      * 修改
+     *
+     **/
+    @RequestMapping("update")
+    @ResponseBody
+    public Object update(HttpServletRequest req,${modelName} ${modelName?uncap_first}) {
+        if (${modelName?uncap_first}.getId() == null || ${modelName?uncap_first}.getVersion() == null) {
+            return Res.err();
+        }
+
+        boolean locked = false;
+        String lockKey = "${modelName?uncap_first}:update:" + ${modelName?uncap_first}.getId();
+
+        try {
+            locked = LOCK.lock(lockKey, Constants.DLOCK_TIME_3_SECONDS);
+            if (!locked) {
+                return Res.err("请稍后重试");
+            }
+
+            // 其它校验
+
+            return ${service}.update(${modelName?uncap_first}, UserUtil.getUser(req));
+        } catch (Exception e) {
+            LogUtil.getLog(${modelName}Controller.class).error("修改失败", e);
+            return Res.err("单据状态已发生变化，请重新打开页面！");
+        } finally {
+            try {
+                if (locked) {
+                    LOCK.unlock(lockKey);
+                }
+            } catch (Exception e) {
+                LogUtil.getLog(${modelName}Controller.class).error("修改释放锁异常[lockKey={}]", lockKey);
+            }
+        }
+    }
+
+     /**
+      * 获取列表
+      *
+      **/
+    @RequestMapping("list")
+    @ResponseBody
+    public Object getList(HttpServletRequest req,${modelName} ${modelName?uncap_first}) {
+        PageInfo pageInfo = new PageInfo<>(${service}.getList(${modelName?uncap_first}));
+        pageInfo.setList(ExtFieldUtil.genConvertList(pageInfo.getList()));
+        return pageInfo;
+    }
+
+    @RequestMapping("delete")
+    @ResponseBody
+    public Object delete(HttpServletRequest req,${modelName} ${modelName?uncap_first}) {
+        if (${modelName?uncap_first}.getId() == null || ${modelName?uncap_first}.getVersion() == null) {
+            return Res.err();
+        }
+
+        boolean locked = false;
+        String lockKey = "${modelName?uncap_first}:delete:" + ${modelName?uncap_first}.getId();
+
+        try {
+            locked = LOCK.lock(lockKey, Constants.DLOCK_TIME_3_SECONDS);
+            if (!locked) {
+                return Res.err("请稍后重试");
+            }
+
+            return ${service}.delete(${modelName?uncap_first}, UserUtil.getUser(req));
+        } catch (Exception e) {
+            LogUtil.getLog(${modelName}Controller.class).error("删除失败", e);
+            return Res.err("单据状态已发生变化，请重新打开页面！");
+        } finally {
+            try {
+                if (locked) {
+                    LOCK.unlock(lockKey);
+                }
+            } catch (Exception e) {
+                LogUtil.getLog(${modelName}Controller.class).error("删除释放锁异常[lockKey={}]", lockKey);
+            }
+        }
+    }
+}
+
+
+
