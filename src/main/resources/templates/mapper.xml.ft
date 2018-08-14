@@ -44,7 +44,7 @@
     </insert>
 
 
-    <update id="update" parameterType="${package}.entity.${modelName}" >
+    <update id="update" parameterType="${modelName}" >
         update ${tableName}
         <set>
             <#list columns as item>
@@ -60,7 +60,7 @@
         AND version = ${"#"}{version}
     </update>
 
-    <update id="delete" parameterType="DemoModel">
+    <update id="delete" parameterType="${modelName}">
         UPDATE ${tableName}
         SET
             del_flag = ${"#"}{delFlag},

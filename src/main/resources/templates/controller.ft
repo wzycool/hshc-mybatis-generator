@@ -30,7 +30,7 @@ import com.hshc.framework.redis.cmd.LockCmd;
  * @date  ${now?datetime}
  */
 @Controller
-@RequestMapping("${requestUrl}")
+@RequestMapping("${modelName?uncap_first}")
 public class ${modelName}Controller{
 
 private final LockCmd LOCK = LockRedisClient.getInstance(RedisNamespaceConstants.DEMO_LOCK_NAMESPACE);
